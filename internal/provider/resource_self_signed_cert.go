@@ -412,6 +412,55 @@ func (r *selfSignedCertResource) Create(ctx context.Context, req resource.Create
 		}
 	}
 
+	// Add SignatureAlgorithm if provided
+	if !newState.SignatureAlgorithm.IsNull() && !newState.SignatureAlgorithm.IsUnknown() {
+		tflog.Debug(ctx, "Adding SignatureAlgorithm on certificate", map[string]interface{}{
+			"signatureAlgorithm": newState.SignatureAlgorithm,
+		})
+
+		signatureAlgorithmStr := newState.SignatureAlgorithm.ValueString()
+		switch signatureAlgorithmStr {
+		case "MD2-RSA":
+			cert.SignatureAlgorithm = x509.MD2WithRSA
+		case "MD5-RSA":
+			cert.SignatureAlgorithm = x509.MD5WithRSA
+		case "SHA1-RSA":
+			cert.SignatureAlgorithm = x509.SHA1WithRSA
+		case "SHA256-RSA":
+			cert.SignatureAlgorithm = x509.SHA256WithRSA
+		case "SHA384-RSA":
+			cert.SignatureAlgorithm = x509.SHA384WithRSA
+		case "SHA512-RSA":
+			cert.SignatureAlgorithm = x509.SHA512WithRSA
+		case "SHA256-RSAPSS":
+			cert.SignatureAlgorithm = x509.SHA256WithRSAPSS
+		case "SHA384-RSAPSS":
+			cert.SignatureAlgorithm = x509.SHA384WithRSAPSS
+		case "SHA512-RSAPSS":
+			cert.SignatureAlgorithm = x509.SHA512WithRSAPSS
+		case "DSA-SHA1":
+			cert.SignatureAlgorithm = x509.DSAWithSHA1
+		case "DSA-SHA256":
+			cert.SignatureAlgorithm = x509.DSAWithSHA256
+		case "ECDSA-SHA1":
+			cert.SignatureAlgorithm = x509.ECDSAWithSHA1
+		case "ECDSA-SHA256":
+			cert.SignatureAlgorithm = x509.ECDSAWithSHA256
+		case "ECDSA-SHA384":
+			cert.SignatureAlgorithm = x509.ECDSAWithSHA384
+		case "ECDSA-SHA512":
+			cert.SignatureAlgorithm = x509.ECDSAWithSHA512
+		case "Ed25519":
+			cert.SignatureAlgorithm = x509.PureEd25519
+		default:
+			res.Diagnostics.AddError(
+				"Invalid SignatureAlgorithm",
+				fmt.Sprintf("Failed to parse %#v: %v", signatureAlgorithmStr, err.Error()),
+			)
+			return
+		}
+	}
+
 	pubKey, err := privateKeyToPublicKey(prvKey)
 	if err != nil {
 		res.Diagnostics.AddError("Failed to get public key from private key", err.Error())

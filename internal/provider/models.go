@@ -91,6 +91,7 @@ type selfSignedCertResourceModel struct {
 	ValidityStartTime   types.String `tfsdk:"validity_start_time"`
 	ValidityEndTime     types.String `tfsdk:"validity_end_time"`
 	KeyAlgorithm        types.String `tfsdk:"key_algorithm"`
+	SignatureAlgorithm  types.String `tfsdk:"signature_algorithm"`
 	ID                  types.String `tfsdk:"id"`
 }
 
